@@ -155,7 +155,7 @@ const am_hal_gpio_pincfg_t g_deepsleep_button0 =
 
 void init_button0_detection(void)
 {
-	am_hal_gpio_pinconfig(AM_BSP_GPIO_BUTTON0, g_deepsleep_button0);
+	am_hal_gpio_pinconfig(AM_BSP_GPIO_BUTTON1, g_deepsleep_button0);
 }
 
 //*****************************************************************************
@@ -201,6 +201,19 @@ main(void)
 	am_hal_gpio_state_write(8, AM_HAL_GPIO_OUTPUT_SET);
 
 
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED0, AM_HAL_GPIO_OUTPUT_TRISTATE_DISABLE);
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED1, AM_HAL_GPIO_OUTPUT_TRISTATE_DISABLE);
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED2, AM_HAL_GPIO_OUTPUT_TRISTATE_DISABLE);
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED3, AM_HAL_GPIO_OUTPUT_TRISTATE_DISABLE);
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED4, AM_HAL_GPIO_OUTPUT_SET);
+
+	//am_hal_gpio_pinconfig(AM_BSP_GPIO_LED0, g_AM_BSP_GPIO_LED0);
+	//am_hal_gpio_pinconfig(AM_BSP_GPIO_LED1, g_AM_BSP_GPIO_LED1);
+	//am_hal_gpio_pinconfig(AM_BSP_GPIO_LED2, g_AM_BSP_GPIO_LED2);
+	//am_hal_gpio_pinconfig(AM_BSP_GPIO_LED3, g_AM_BSP_GPIO_LED3);
+	am_hal_gpio_pinconfig(AM_BSP_GPIO_LED4, g_AM_BSP_GPIO_LED4);
+
+
 	am_hal_burst_mode_initialize(&eBurstModeAvailable);
 
 	am_hal_burst_mode_enable(&eBurstMode);
@@ -230,10 +243,11 @@ main(void)
 
 	while(ui32PinValue)
 	{
-		am_hal_gpio_state_read(AM_BSP_GPIO_BUTTON0, AM_HAL_GPIO_INPUT_READ, &ui32PinValue );
+		am_hal_gpio_state_read(AM_BSP_GPIO_BUTTON1, AM_HAL_GPIO_INPUT_READ, &ui32PinValue );
 		
 		if(ui32PinValue == 0)
 		{
+			am_hal_gpio_state_write(AM_BSP_GPIO_LED3, AM_HAL_GPIO_OUTPUT_SET);
 			ret = storage_erase((512*1024), (512*1024));
 			if(ret)
 				am_util_stdio_printf("storage_erase failed \r\n");
@@ -242,6 +256,9 @@ main(void)
 			break;
 		}
 	}
+
+	am_hal_gpio_state_write(AM_BSP_GPIO_LED2, AM_HAL_GPIO_OUTPUT_SET);
+
 
 
 	//
@@ -256,11 +273,12 @@ main(void)
 
 			u32PDMpg = u32PDMPingpong;
 
-			am_hal_gpio_state_read(AM_BSP_GPIO_BUTTON0, AM_HAL_GPIO_INPUT_READ, &ui32PinValue );
+			am_hal_gpio_state_read(AM_BSP_GPIO_BUTTON1, AM_HAL_GPIO_INPUT_READ, &ui32PinValue );
 			if(ui32PinValue == 0)
 			{
 				if(ui32deBounce++ >= 3)
 				{
+					am_hal_gpio_state_write(AM_BSP_GPIO_LED1, AM_HAL_GPIO_OUTPUT_SET);
 					ret = storage_write(index, i16PDMBuf[(u32PDMpg-1)%2], BUF_SIZE*2);
 					if(ret)
 						am_util_stdio_printf("storage_write failed \r\n");
@@ -268,6 +286,8 @@ main(void)
 					if(index > ((512+384)*1024))
 					{
 						am_util_stdio_printf("Done \r\n");
+						
+						am_hal_gpio_state_write(AM_BSP_GPIO_LED0, AM_HAL_GPIO_OUTPUT_SET);
 						am_hal_interrupt_master_disable();
 						am_hal_sysctrl_sleep(AM_HAL_SYSCTRL_SLEEP_NORMAL);
 						while(1);
