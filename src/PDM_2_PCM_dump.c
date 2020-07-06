@@ -73,11 +73,11 @@ pdm_init(void)
 	//
 	am_hal_gpio_pincfg_t sPinCfg = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    sPinCfg.uFuncSel = AM_HAL_PIN_12_PDMCLK;
-    am_hal_gpio_pinconfig(12, sPinCfg);
+    sPinCfg.uFuncSel = AM_HAL_PIN_14_PDMCLK;
+    am_hal_gpio_pinconfig(14, sPinCfg);
 
-    sPinCfg.uFuncSel = AM_HAL_PIN_11_PDMDATA;
-    am_hal_gpio_pinconfig(11, sPinCfg);
+    sPinCfg.uFuncSel = AM_HAL_PIN_15_PDMDATA;
+    am_hal_gpio_pinconfig(15, sPinCfg);
 
 	//
 	// Configure and enable PDM interrupts (set up to trigger on DMA
@@ -240,6 +240,7 @@ main(void)
 	init_button0_detection();
 
 	ui32PinValue = 1;
+	am_util_stdio_printf("Press & release BTN3 to erase Flash (start from 0x80000, size:512KB[0x80000])\r\n");
 
 	while(ui32PinValue)
 	{
@@ -252,7 +253,11 @@ main(void)
 			if(ret)
 				am_util_stdio_printf("storage_erase failed \r\n");
 			else
+			{
 				am_util_stdio_printf("storage_erase OK \r\n");
+				am_util_stdio_printf("Press & HOLD BTN3 to record PCM into Flash\r\n");
+				am_util_stdio_printf("HOLD BTN3 till message -Done- appeared \r\n");
+			}
 			break;
 		}
 	}

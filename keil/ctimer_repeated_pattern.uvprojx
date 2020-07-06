@@ -393,11 +393,6 @@
               <FilePath>..\src\UART.c</FilePath>
             </File>
             <File>
-              <FileName>am_hal_pdm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\mcu\apollo3\hal\am_hal_pdm.c</FilePath>
-            </File>
-            <File>
               <FileName>am_storage.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\am_storage.c</FilePath>
