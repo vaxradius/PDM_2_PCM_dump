@@ -31,8 +31,8 @@ am_hal_pdm_config_t g_sPdmConfig =
 {
 	.eClkDivider = AM_HAL_PDM_MCLKDIV_1,
 	//.eClkDivider = AM_HAL_PDM_MCLKDIV_2,
-	.eLeftGain = AM_HAL_PDM_GAIN_P285DB,
-	.eRightGain = AM_HAL_PDM_GAIN_P285DB,
+	.eLeftGain = AM_HAL_PDM_GAIN_P210DB,
+	.eRightGain = AM_HAL_PDM_GAIN_P210DB,
 	//.ui32DecimationRate = 0xC,
 	.ui32DecimationRate = 0x18,
 	//.ui32DecimationRate = 0x30,
@@ -73,11 +73,11 @@ pdm_init(void)
 	//
 	am_hal_gpio_pincfg_t sPinCfg = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    sPinCfg.uFuncSel = AM_HAL_PIN_14_PDMCLK;
-    am_hal_gpio_pinconfig(14, sPinCfg);
+    sPinCfg.uFuncSel = AM_HAL_PIN_12_PDMCLK;
+    am_hal_gpio_pinconfig(12, sPinCfg);
 
-    sPinCfg.uFuncSel = AM_HAL_PIN_15_PDMDATA;
-    am_hal_gpio_pinconfig(15, sPinCfg);
+    sPinCfg.uFuncSel = AM_HAL_PIN_11_PDMDATA;
+    am_hal_gpio_pinconfig(11, sPinCfg);
 
 	//
 	// Configure and enable PDM interrupts (set up to trigger on DMA
