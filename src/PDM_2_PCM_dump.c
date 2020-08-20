@@ -57,13 +57,15 @@ am_hal_pdm_config_t g_sPdmConfig =
 // PDM initialization.
 //
 //*****************************************************************************
-void
-pdm_init(void)
+void pdm_init(void)
 {
-	//
-	// Initialize, power-up, and configure the PDM.
-	//
 	am_hal_pdm_initialize(0, &PDMHandle);
+}
+
+void pdm_data_get(int16_t *dest);
+
+void pdm_start(void)
+{
 	am_hal_pdm_power_control(PDMHandle, AM_HAL_PDM_POWER_ON, false);
 	am_hal_pdm_configure(PDMHandle, &g_sPdmConfig);
 	am_hal_pdm_enable(PDMHandle);
@@ -73,12 +75,18 @@ pdm_init(void)
 	//
 	am_hal_gpio_pincfg_t sPinCfg = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+
     sPinCfg.uFuncSel = AM_HAL_PIN_12_PDMCLK;
     am_hal_gpio_pinconfig(12, sPinCfg);
 
     sPinCfg.uFuncSel = AM_HAL_PIN_11_PDMDATA;
     am_hal_gpio_pinconfig(11, sPinCfg);
 
+
+	am_hal_pdm_interrupt_clear(PDMHandle, (AM_HAL_PDM_INT_DERR
+	                                        | AM_HAL_PDM_INT_DCMP
+	                                        | AM_HAL_PDM_INT_UNDFL
+	                                        | AM_HAL_PDM_INT_OVF));
 	//
 	// Configure and enable PDM interrupts (set up to trigger on DMA
 	// completion).
@@ -87,12 +95,32 @@ pdm_init(void)
 	                                        | AM_HAL_PDM_INT_DCMP
 	                                        | AM_HAL_PDM_INT_UNDFL
 	                                        | AM_HAL_PDM_INT_OVF));
-
-#if AM_CMSIS_REGS
 	NVIC_EnableIRQ(PDM_IRQn);
-#else
-	am_hal_interrupt_enable(AM_HAL_INTERRUPT_PDM);
-#endif
+
+	am_hal_pdm_fifo_flush(PDMHandle);
+	am_hal_pdm_enable(PDMHandle);
+	pdm_data_get(i16PDMBuf[0]);
+}
+
+void pdm_stop(void)
+{
+	NVIC_DisableIRQ(PDM_IRQn);
+	am_hal_pdm_interrupt_disable(PDMHandle, (AM_HAL_PDM_INT_DERR
+	                                        | AM_HAL_PDM_INT_DCMP
+	                                        | AM_HAL_PDM_INT_UNDFL
+	                                        | AM_HAL_PDM_INT_OVF));
+	am_hal_pdm_interrupt_clear(PDMHandle, (AM_HAL_PDM_INT_DERR
+	                                        | AM_HAL_PDM_INT_DCMP
+	                                        | AM_HAL_PDM_INT_UNDFL
+	                                        | AM_HAL_PDM_INT_OVF));
+
+
+	am_hal_gpio_pinconfig(12, g_AM_HAL_GPIO_DISABLE);
+	am_hal_gpio_pinconfig(11, g_AM_HAL_GPIO_DISABLE);
+
+	am_hal_pdm_disable(PDMHandle);
+
+	am_hal_pdm_power_control(PDMHandle, AM_HAL_PDM_POWER_OFF, false);
 }
 
 
@@ -189,12 +217,7 @@ main(void)
 	am_hal_interrupt_master_enable();
 
 	pdm_init();
-	am_hal_pdm_fifo_flush(PDMHandle);
-	am_hal_pdm_enable(PDMHandle);
 	
-
-	pdm_data_get(i16PDMBuf[0]);
-
 	am_hal_gpio_pinconfig(6, g_AM_HAL_GPIO_OUTPUT);
 	am_hal_gpio_pinconfig(8, g_AM_HAL_GPIO_OUTPUT);
 	am_hal_gpio_state_write(6, AM_HAL_GPIO_OUTPUT_SET);
@@ -263,7 +286,8 @@ main(void)
 	}
 
 	am_hal_gpio_state_write(AM_BSP_GPIO_LED2, AM_HAL_GPIO_OUTPUT_SET);
-
+	
+	pdm_start();
 
 
 	//
@@ -293,9 +317,7 @@ main(void)
 						am_util_stdio_printf("Done \r\n");
 						
 						am_hal_gpio_state_write(AM_BSP_GPIO_LED0, AM_HAL_GPIO_OUTPUT_SET);
-						am_hal_interrupt_master_disable();
-						am_hal_sysctrl_sleep(AM_HAL_SYSCTRL_SLEEP_NORMAL);
-						while(1);
+						pdm_stop();
 					}
 				}
 			}
