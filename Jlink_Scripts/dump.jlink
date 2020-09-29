@@ -1,0 +1,13 @@
+//connect to device
+// NEED to specify -device AMA3B2KK-KBR (for Apollo3P) or -device AMA3B1KK-KBR/KCR (for Apollo3) from command line
+si SWD
+speed 4000
+r
+sleep 10
+
+savebin dump.bin 0x80000 0x60000
+
+
+// reset and quit
+r
+qc

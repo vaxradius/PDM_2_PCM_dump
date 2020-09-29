@@ -46,7 +46,8 @@ am_hal_pdm_config_t g_sPdmConfig =
 	.ePDMClkSource = AM_HAL_PDM_INTERNAL_CLK,
 	.bPDMSampleDelay = 0,
 	.bDataPacking = 1,
-	.ePCMChannels = AM_HAL_PDM_CHANNEL_RIGHT,
+	//.ePCMChannels = AM_HAL_PDM_CHANNEL_RIGHT,
+	.ePCMChannels = AM_HAL_PDM_CHANNEL_STEREO,
 	.bLRSwap = 0,
 };
 
